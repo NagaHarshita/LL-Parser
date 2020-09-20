@@ -284,9 +284,9 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 
 #define YY_NUM_RULES 3
 #define YY_END_OF_BUFFER 4
-static yyconst short int yy_accept[10] =
+static yyconst short int yy_accept[9] =
     {   0,
-        0,    0,    4,    3,    3,    2,    1,    1,    0
+        0,    0,    4,    2,    1,    0,    1,    0
     } ;
 
 static yyconst int yy_ec[256] =
@@ -295,11 +295,11 @@ static yyconst int yy_ec[256] =
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    3,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    4,    1,    1,    5,    5,    5,    5,    5,    5,
-        5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
-        5,    5,    5,    5,    5,    5,    5,    5,    5,    5,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
 
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -321,33 +321,29 @@ static yyconst int yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst int yy_meta[6] =
+static yyconst int yy_meta[3] =
     {   0,
-        1,    2,    1,    3,    1
+        1,    1
     } ;
 
-static yyconst short int yy_base[13] =
+static yyconst short int yy_base[9] =
     {   0,
-        0,    3,    7,   15,    0,   15,    0,    0,   15,    8,
-        1,   11
+        0,    0,    5,    2,    6,    0,    6,    6
     } ;
 
-static yyconst short int yy_def[13] =
+static yyconst short int yy_def[9] =
     {   0,
-       10,   10,    9,    9,   11,    9,   12,   12,    0,    9,
-        9,    9
+        8,    1,    8,    8,    8,    4,    8,    0
     } ;
 
-static yyconst short int yy_nxt[21] =
+static yyconst short int yy_nxt[9] =
     {   0,
-        9,    9,    5,    7,    6,    5,    9,    6,    4,    4,
-        4,    8,    9,    8,    3,    9,    9,    9,    9,    9
+        4,    5,    6,    7,    8,    3,    8,    8
     } ;
 
-static yyconst short int yy_chk[21] =
+static yyconst short int yy_chk[9] =
     {   0,
-        0,    0,    1,   11,    1,    2,    3,    2,   10,   10,
-       10,   12,    0,   12,    9,    9,    9,    9,    9,    9
+        1,    1,    4,    4,    3,    8,    8,    8
     } ;
 
 static yy_state_type yy_last_accepting_state;
@@ -367,13 +363,34 @@ char *yytext;
     #include <stdio.h>
     #include <string.h>
     #include <stdlib.h>
-    int n=0;
-    char* variables;
-    int size = 0;
-    char** productions;
-    int* len;
+    #include<ctype.h> 
+    typedef struct cfg grammar;
+    typedef struct parseTable ll;
+    // char* f; 
+    struct cfg{
+        char variables[100]; /* Stores the variables */
+        char productions[100][100]; /* Each variable has a CFG.productions which is a string */
+        int size;
+    };
+
+    grammar CFG;
+    ll LL;
+
+    // char LL.first[10][100]; 
     
-#line 377 "lex.yy.c"
+    char f[10], first[10]; 
+    int count, n = 0;
+
+    struct parseTable{
+        char first[100][100];
+        char follow[100][100];
+        int firstLen[100];
+        int followLen[100];
+        int m;
+    };
+    char* token;
+
+#line 394 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -524,9 +541,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 16 "llparser.l"
+#line 37 "llparser.l"
 
-#line 530 "lex.yy.c"
+
+#line 548 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -577,13 +595,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 10 )
+				if ( yy_current_state >= 9 )
 					yy_c = yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 15 );
+		while ( yy_base[yy_current_state] != 6 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -611,37 +629,41 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 17 "llparser.l"
+#line 39 "llparser.l"
 { 
-    char** newPtr = realloc(productions, size * sizeof(*productions));
-    productions = newPtr;
-    char* newChar = (char *)malloc((strlen(yytext) - 3)* sizeof(char));
-    productions[size-1] = newChar;
-    int* newLen = (int *)realloc(len,sizeof(int) * size);
-    len = newLen;
-    len[size-1] = (strlen(yytext) - 3);
-    for(int i = 3;i<strlen(yytext);i++){
-        productions[size-1][i-3] = yytext[i];
+    char c[10];
+    c[0] = yytext[0];
+    c[1] = '\0';
+    char del[] = "->";
+    strncat(c, del, 2);
+    char split[100];
+    for(int i=3;i<strlen(yytext)-1;i++){
+        split[i-3] = yytext[i];
     }
-}
+    split[strlen(yytext)-4] = '\0';
+    token = strtok(split, "|");
+    while(token != NULL){
+        char t[10] ;
+        strcpy(t,c);
+        char* p = token;
+        strncat(t, p, strlen(p));
+        strcpy(CFG.productions[CFG.size], t);
+        CFG.size++;
+        token = strtok(NULL, "|");
+    }
+};
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 29 "llparser.l"
-{ 
-    
-    size++;
-    void* newPtr = realloc(variables, size * sizeof(char));
-    variables = newPtr;
-    variables[size-1] = yytext[0];
-}
+#line 61 "llparser.l"
+;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 38 "llparser.l"
+#line 63 "llparser.l"
 ECHO;
 	YY_BREAK
-#line 645 "lex.yy.c"
+#line 667 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -933,7 +955,7 @@ static yy_state_type yy_get_previous_state()
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 10 )
+			if ( yy_current_state >= 9 )
 				yy_c = yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
@@ -968,11 +990,11 @@ yy_state_type yy_current_state;
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 10 )
+		if ( yy_current_state >= 9 )
 			yy_c = yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
-	yy_is_jam = (yy_current_state == 9);
+	yy_is_jam = (yy_current_state == 8);
 
 	return yy_is_jam ? 0 : yy_current_state;
 	}
@@ -1527,28 +1549,164 @@ int main()
 	return 0;
 	}
 #endif
-#line 38 "llparser.l"
+#line 63 "llparser.l"
+
+
+
+
+
+void findfirst(char c, int q1, int q2) 
+{ 
+	int j; 
+	// The case where we 
+	// encounter a Terminal 
+	if(!(isupper(c))) { 
+		first[n++] = c; 
+	} 
+	for(j = 0; j < count; j++) 
+	{ 
+		if(CFG.productions[j][0] == c) 
+		{ 
+			if(CFG.productions[j][3] == '#') 
+			{ 
+				if(CFG.productions[q1][q2] == '\0') 
+					first[n++] = '#'; 
+				else if(CFG.productions[q1][q2] != '\0'
+						&& (q1 != 0 || q2 != 0)) 
+				{ 
+					
+					findfirst(CFG.productions[q1][q2], q1, (q2+1)); 
+				} 
+				else
+					first[n++] = '#'; 
+			} 
+			else if(!isupper(CFG.productions[j][3])) 
+			{ 
+				first[n++] = CFG.productions[j][3]; 
+			} 
+			else
+			{ 
+				// Recursion to calculate First of 
+				// New Non-Terminal we encounter 
+				// at the beginning 
+				findfirst(CFG.productions[j][3], j, 3); 
+			} 
+		} 
+	} 
+} 
+
+
+void First(){
+    
+    // Stores the final result 
+    // of the First Sets 
+    int m = 0; 
+
+    // Stores the productions rules 
+    
+    int k; 
+    char ck; 
+    int e; 
+
+    int jm = 0; 
+	int km = 0; 
+	int i, choice; 
+	char c, ch; 
+	count = 8; 
+
+    int kay; 
+	char done[count]; 
+	int ptr = -1; 
+
+    // Initializing the LL.first array 
+	for(k = 0; k < count; k++) { 
+		for(kay = 0; kay < 100; kay++) { 
+			LL.first[k][kay] = '!'; 
+		} 
+	} 
+	int point1 = 0, point2, xxx; 
+	
+	for(k = 0; k < count; k++) 
+	{ 
+		c = CFG.productions[k][0]; 
+		point2 = 0; 
+		xxx = 0; 
+		
+		// Checking if First of c has 
+		// already been calculated 
+		for(kay = 0; kay <= ptr; kay++) 
+			if(c == done[kay]) 
+				xxx = 1; 
+				
+		if (xxx == 1) 
+			continue; 
+		
+		// Function call	 
+		findfirst(c, 0, 0); 
+		ptr += 1; 
+		
+		// Adding c to the calculated list 
+		done[ptr] = c;
+		LL.first[point1][point2++] = c; 
+		
+		// Printing the First Sets of the grammar 
+		for(i = 0 + jm; i < n; i++) { 
+			int lark = 0, chk = 0; 
+			
+			for(lark = 0; lark < point2; lark++) { 
+				
+				if (first[i] == LL.first[point1][lark]) 
+				{ 
+					chk = 1; 
+					break; 
+				} 
+			} 
+			if(chk == 0){ 
+				LL.first[point1][point2++] = first[i]; 
+			} 
+
+		} 
+		jm = n; 
+        LL.firstLen[point1] = point2;
+		point1++; 
+        
+	} 
+    LL.m = point1;
+    
+}
+
 
 
 
 int main(int argc, char **argv){
     FILE *file;
     file = fopen("grammar", "r");
+    CFG.size = 0;
     if(!file){
         printf("Could not Open the File");
         exit(0);
     }
     yyin = file;
+    
     yylex();
-    for(int i=0;i<size;i++){
-        printf("%c : ", variables[i]);
-        for(int j=0;j<len[i];j++){
-            printf("%c",productions[i][j]);
+    First();
+    for(int i=0;i<CFG.size;i++){
+        printf("%s\n", CFG.productions[i]);
+    }
+    for(int i=0;i<LL.m;i++){
+        printf("%c : [", CFG.productions[i][0]);
+        for(int j=1;j<LL.firstLen[i]-1;j++){
+            printf("%c, ", LL.first[i][j]);
         }
-        printf("\n");
+        if(LL.firstLen[i]>=1){
+            printf("%c]\n", LL.first[i][LL.firstLen[i]-1]);
+        }
+        
     }
 
     return 0;
+
+    
 }
 
 int yywrap(void){
