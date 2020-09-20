@@ -364,8 +364,10 @@ char *yytext;
     #include <string.h>
     #include <stdlib.h>
     #include<ctype.h> 
+    #include<stdbool.h>
     typedef struct cfg grammar;
     typedef struct parseTable ll;
+    void findfollow(char c, int ind);
     // char* f; 
     struct cfg{
         char variables[100]; /* Stores the variables */
@@ -380,6 +382,7 @@ char *yytext;
     
     char f[10], first[10]; 
     int count, n = 0;
+    int visited[10];
 
     struct parseTable{
         char first[100][100];
@@ -390,7 +393,7 @@ char *yytext;
     };
     char* token;
 
-#line 394 "lex.yy.c"
+#line 397 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -541,10 +544,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 37 "llparser.l"
+#line 40 "llparser.l"
 
 
-#line 548 "lex.yy.c"
+#line 551 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -629,7 +632,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 39 "llparser.l"
+#line 42 "llparser.l"
 { 
     char c[10];
     c[0] = yytext[0];
@@ -655,15 +658,15 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 61 "llparser.l"
+#line 64 "llparser.l"
 ;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 63 "llparser.l"
+#line 66 "llparser.l"
 ECHO;
 	YY_BREAK
-#line 667 "lex.yy.c"
+#line 670 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1549,7 +1552,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 63 "llparser.l"
+#line 66 "llparser.l"
 
 
 
@@ -1603,7 +1606,6 @@ void First(){
     int m = 0; 
 
     // Stores the productions rules 
-    
     int k; 
     char ck; 
     int e; 
@@ -1612,7 +1614,7 @@ void First(){
 	int km = 0; 
 	int i, choice; 
 	char c, ch; 
-	count = 8; 
+	count = CFG.size; 
 
     int kay; 
 	char done[count]; 
@@ -1675,7 +1677,107 @@ void First(){
     
 }
 
+int findInd(char c){
+    for(int i=0;i<LL.m;i++){
+        if(c==LL.first[i][0]){
+            return i;
+        }
+    }
+    return -1;
+}
 
+void addFollow(char c, int i, int j, int ind){
+    int point = LL.followLen[ind]>0 ? LL.followLen[ind] : 1;
+    if(islower(c)){
+        LL.follow[ind][point++] = c;
+        LL.followLen[ind] = point;
+        return;
+    }
+    int k = findInd(c);
+    if(k==-1){
+        return;
+    }
+    
+    if(visited[k]!=true){
+        findfollow(CFG.productions[i][j], k);
+    }
+    for(int p=1;p<LL.followLen[k];p++){
+        LL.follow[ind][point++] = LL.follow[k][p];
+        LL.followLen[ind] = point;
+    }
+}
+
+
+void addFirst(char c, int i, int j, int ind){
+    int point = LL.followLen[ind]>0 ? LL.followLen[ind] : 1;
+    if(islower(c)){
+        LL.follow[ind][point++] = c;
+        LL.followLen[ind] = point;
+        return;
+    }
+    int k = findInd(c);
+    if(k==-1){
+        return;
+    }
+    int flag=0;
+    
+    {
+        for(int p=1;p<LL.firstLen[k];p++){
+            if(LL.first[k][p]=='#'){
+                flag=1;
+            }else{
+                LL.follow[ind][point++] = LL.first[k][p];
+                LL.followLen[ind] = point;
+            }
+        }
+    }
+    
+    if(flag==1){
+        if(CFG.productions[i][j+1]!='\0' || CFG.productions[i][j+1]!=0){
+            printf("*%c\n", CFG.productions[i][j+1]);
+            addFirst(CFG.productions[i][j+1], i, j+1, ind);
+        }else{
+            printf("#%c\n", CFG.productions[i][j+1]);
+            addFollow(CFG.productions[i][j], i, j, ind);
+        }
+    }
+}
+
+
+void findfollow(char c, int ind){
+    int point = 1;
+    if(visited[ind]==0){
+        if(CFG.productions[0][0]==c){
+            LL.follow[0][point++]='$';
+            LL.followLen[ind] = point; 
+        }
+
+        for(int i=0;i<CFG.size;i++){
+            for(int j=3;j<strlen(CFG.productions[i]);j++){
+                if(CFG.productions[i][j]==c){
+                    if(CFG.productions[i][j+1]!='\0'){
+                        addFirst(CFG.productions[i][j+1], i, j+1, ind);   
+                    }else{
+                        if(CFG.productions[i][j+1]=='\0' && c!=CFG.productions[i][0]){
+                            addFollow(CFG.productions[i][0], i, 0, ind);
+                        }
+                    }   
+                }
+            }
+        }
+        visited[ind] = 1;
+    }
+    
+}
+
+void Follow(){
+    for(int i=0;i<LL.m;i++){
+        LL.follow[i][0] = LL.first[i][0];
+    }
+    for(int i=0;i<LL.m;i++){
+        findfollow(LL.follow[i][0], i);
+    }
+}
 
 
 int main(int argc, char **argv){
@@ -1689,24 +1791,42 @@ int main(int argc, char **argv){
     yyin = file;
     
     yylex();
+    for(int i=0;i<LL.m;i++){
+        visited[i] = 0;
+    }
     First();
+    Follow();
+
+    printf("********** Printing Productions ***********\n");
     for(int i=0;i<CFG.size;i++){
         printf("%s\n", CFG.productions[i]);
     }
+    printf("********** Printing First **********\n");
     for(int i=0;i<LL.m;i++){
-        printf("%c : [", CFG.productions[i][0]);
+        printf("%c : [", LL.first[i][0]);
         for(int j=1;j<LL.firstLen[i]-1;j++){
             printf("%c, ", LL.first[i][j]);
         }
         if(LL.firstLen[i]>=1){
-            printf("%c]\n", LL.first[i][LL.firstLen[i]-1]);
+            printf("%c", LL.first[i][LL.firstLen[i]-1]);
         }
+        printf("]\n");
         
     }
-
-    return 0;
-
+    printf("************** Printing Follow ***********\n");
+    for(int i=0;i<LL.m;i++){
+        printf("%c : [", LL.follow[i][0]);
+        for(int j=1;j<LL.followLen[i]-1;j++){
+            printf("%c, ", LL.follow[i][j]);
+        }
+        if(LL.followLen[i]>=1){
+            printf("%c", LL.follow[i][LL.followLen[i]-1]);
+        }
+        printf("]\n");
+    }
     
+
+    return 0;   
 }
 
 int yywrap(void){
