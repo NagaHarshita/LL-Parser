@@ -19,9 +19,9 @@
 
     // char LL.first[10][100]; 
     
-    char f[10], first[10]; 
+    char f[100], first[100]; 
     int count, n = 0;
-    int visited[10];
+    int visited[100];
 
     struct parseTable{
         char first[100][100];
@@ -34,7 +34,7 @@
 
 %}
 
-arrow "->"
+LL.follow[ind]ow "->"
 variables [A-Z]
 
 %%
@@ -66,10 +66,36 @@ variables [A-Z]
 %%
 
 
+void removeDuplicates(int ind){
+    int i, j, k;
+    int size = LL.followLen[ind];
+    for(i=0; i<size; i++){
+        for(j=i+1; j<size; j++)
+        {
+            /* If any duplicate found */
+            if(LL.follow[ind][i] == LL.follow[ind][j])
+            {
+                /* Delete the current duplicate element */
+                for(k=j; k<size; k++)
+                {
+                    LL.follow[ind][k] = LL.follow[ind][k + 1];
+                }
+
+                /* Decrement size after removing duplicate element */
+                size--;
+
+                /* If shifting of elements occur then don't increment j */
+                j--;
+            }
+        }
+    }
+    LL.followLen[ind] = size;
+}
 
 
 void findfirst(char c, int q1, int q2) 
 { 
+    printf("%c\n", c);
 	int j; 
 	// The case where we 
 	// encounter a Terminal 
@@ -85,7 +111,7 @@ void findfirst(char c, int q1, int q2)
 				if(CFG.productions[q1][q2] == '\0') 
 					first[n++] = '#'; 
 				else if(CFG.productions[q1][q2] != '\0'
-						&& (q1 != 0 || q2 != 0)) 
+						&& (q1 != 0 || q2 != 0) && CFG.productions[q1][q2] != c) 
 				{ 
 					
 					findfirst(CFG.productions[q1][q2], q1, (q2+1)); 
@@ -102,7 +128,8 @@ void findfirst(char c, int q1, int q2)
 				// Recursion to calculate First of 
 				// New Non-Terminal we encounter 
 				// at the beginning 
-				findfirst(CFG.productions[j][3], j, 3); 
+                if(CFG.productions[j][3]!=c)
+				    findfirst(CFG.productions[j][3], j, 3); 
 			} 
 		} 
 	} 
@@ -130,7 +157,7 @@ void First(){
 	char done[count]; 
 	int ptr = -1; 
 
-    // Initializing the LL.first array 
+    // Initializing the LL.first LL.follow[ind]ay 
 	for(k = 0; k < count; k++) { 
 		for(kay = 0; kay < 100; kay++) { 
 			LL.first[k][kay] = '!'; 
@@ -275,6 +302,7 @@ void findfollow(char c, int ind){
                 }
             }
         }
+        removeDuplicates(ind);
         visited[ind] = 1;
     }
     
