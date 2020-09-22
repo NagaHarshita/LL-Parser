@@ -5,13 +5,16 @@
     #include<ctype.h> 
     #include<stdbool.h>
     typedef struct cfg grammar;
-    typedef struct parseTable ll;
+    typedef struct parse ll;
     void findfollow(char c, int ind);
+    int findInd(char c);
     // char* f; 
     struct cfg{
         char variables[100]; /* Stores the variables */
-        char productions[100][100]; /* Each variable has a CFG.productions which is a string */
+        char terminals[100];
+        char productions[100][100]; /* Each variable has a productions which is a string */
         int size;
+        int terminalLen;
     };
 
     grammar CFG;
@@ -23,18 +26,18 @@
     int count, n = 0;
     int visited[100];
 
-    struct parseTable{
+    struct parse{
         char first[100][100];
         char follow[100][100];
         int firstLen[100];
         int followLen[100];
         int m;
+        char table[100][100][100];
+        int tableLen[100][100];
     };
     char* token;
-
 %}
 
-LL.follow[ind]ow "->"
 variables [A-Z]
 
 %%
@@ -92,9 +95,36 @@ void removeDuplicates(int ind){
     LL.followLen[ind] = size;
 }
 
+void removeDuplicatesInTerminals(){
+    int i, j, k;
+    int size = CFG.terminalLen;
+    for(i=0; i<size; i++){
+        for(j=i+1; j<size; j++)
+        {
+            /* If any duplicate found */
+            if(CFG.terminals[i] == CFG.terminals[j])
+            {
+                /* Delete the current duplicate element */
+                for(k=j; k<size; k++)
+                {
+                    CFG.terminals[k] = CFG.terminals[k + 1];
+                }
+
+                /* Decrement size after removing duplicate element */
+                size--;
+
+                /* If shifting of elements occur then don't increment j */
+                j--;
+            }
+        }
+    }
+    CFG.terminalLen = size;
+}
+
 
 void findfirst(char c, int q1, int q2) 
 { 
+    
     printf("%c\n", c);
 	int j; 
 	// The case where we 
@@ -111,7 +141,7 @@ void findfirst(char c, int q1, int q2)
 				if(CFG.productions[q1][q2] == '\0') 
 					first[n++] = '#'; 
 				else if(CFG.productions[q1][q2] != '\0'
-						&& (q1 != 0 || q2 != 0) && CFG.productions[q1][q2] != c) 
+						&& (q1 != 0 || q2 != 0) ) 
 				{ 
 					
 					findfirst(CFG.productions[q1][q2], q1, (q2+1)); 
@@ -132,7 +162,8 @@ void findfirst(char c, int q1, int q2)
 				    findfirst(CFG.productions[j][3], j, 3); 
 			} 
 		} 
-	} 
+	}
+    // visited[k] = 1; 
 } 
 
 
@@ -157,7 +188,6 @@ void First(){
 	char done[count]; 
 	int ptr = -1; 
 
-    // Initializing the LL.first LL.follow[ind]ay 
 	for(k = 0; k < count; k++) { 
 		for(kay = 0; kay < 100; kay++) { 
 			LL.first[k][kay] = '!'; 
@@ -224,8 +254,8 @@ int findInd(char c){
 }
 
 void addFollow(char c, int i, int j, int ind){
-    int point = LL.followLen[ind]>0 ? LL.followLen[ind] : 1;
-    if(islower(c)){
+    int point = LL.followLen[ind] > 0 ? LL.followLen[ind] : 1;
+    if(!(isupper(c))){
         LL.follow[ind][point++] = c;
         LL.followLen[ind] = point;
         return;
@@ -271,10 +301,8 @@ void addFirst(char c, int i, int j, int ind){
     
     if(flag==1){
         if(CFG.productions[i][j+1]!='\0' || CFG.productions[i][j+1]!=0){
-            printf("*%c\n", CFG.productions[i][j+1]);
             addFirst(CFG.productions[i][j+1], i, j+1, ind);
         }else{
-            printf("#%c\n", CFG.productions[i][j+1]);
             addFollow(CFG.productions[i][j], i, j, ind);
         }
     }
@@ -284,6 +312,7 @@ void addFirst(char c, int i, int j, int ind){
 void findfollow(char c, int ind){
     int point = 1;
     if(visited[ind]==0){
+        visited[ind] = 1;
         if(CFG.productions[0][0]==c){
             LL.follow[0][point++]='$';
             LL.followLen[ind] = point; 
@@ -291,6 +320,10 @@ void findfollow(char c, int ind){
 
         for(int i=0;i<CFG.size;i++){
             for(int j=3;j<strlen(CFG.productions[i]);j++){
+                if(CFG.productions[i][j]=='#' || islower(CFG.productions[i][j])){
+                    CFG.terminals[CFG.terminalLen] = CFG.productions[i][j];
+                    CFG.terminalLen++;
+                }
                 if(CFG.productions[i][j]==c){
                     if(CFG.productions[i][j+1]!='\0'){
                         addFirst(CFG.productions[i][j+1], i, j+1, ind);   
@@ -303,7 +336,8 @@ void findfollow(char c, int ind){
             }
         }
         removeDuplicates(ind);
-        visited[ind] = 1;
+        
+        // visited[ind] = 1;
     }
     
 }
@@ -315,7 +349,85 @@ void Follow(){
     for(int i=0;i<LL.m;i++){
         findfollow(LL.follow[i][0], i);
     }
+    removeDuplicatesInTerminals();
 }
+
+int getInd(char c){
+    for(int i=0;i<CFG.terminalLen;i++){
+        if(CFG.terminals[i]==c)
+            return i;
+    }
+    return -1;
+}
+
+void parseAddFollow(char c, int i, int j, int ind){
+    
+    if(!(isupper(c))){
+        int ind1 = getInd(c);
+        int point = LL.tableLen[ind][ind1] > 0 ? LL.tableLen[ind][ind1] : 0;
+        LL.table[ind][ind1][point++] = i;
+        LL.tableLen[ind][ind1] = point;
+        return;
+    }
+    int k = findInd(c);
+    if(k==-1){
+        return;
+    }
+
+    for(int p=1;p<LL.followLen[k];p++){
+        int ind1 = getInd(LL.follow[k][p]);
+        int point = LL.tableLen[ind][ind1] > 0 ? LL.tableLen[ind][ind1] : 0;
+        LL.table[ind][ind1][point++] = i;
+        LL.tableLen[ind][ind1] = point;
+    }
+}
+
+
+void parseAddFirst(char c, int i, int j, int ind){
+
+    if(islower(c)){
+        int ind1 = getInd(c);
+        int point = LL.tableLen[ind][ind1]>0 ? LL.tableLen[ind][ind1] : 0;
+        LL.table[ind][ind1][point++] = i;
+        LL.tableLen[ind][ind1] = point;
+        return;
+    }
+    if(c=='#'){
+        parseAddFollow(CFG.productions[i][0], i, 0, ind);
+        return;
+    }
+    
+    int flag=0;
+    int k = findInd(c);
+    {
+        for(int p=1;p<LL.firstLen[k];p++){
+            if(LL.first[k][p]=='#'){
+                flag=1;
+            }else{
+                int ind1 = getInd(LL.first[k][p]);
+                int point = LL.tableLen[ind][ind1]>0 ? LL.tableLen[ind][ind1] : 0;
+                LL.table[ind][ind1][point++] = i;
+                LL.tableLen[ind][ind1] = point;
+            }
+        }
+    }
+    
+    if(flag==1){
+        if(CFG.productions[i][j+1]!='\0' || CFG.productions[i][j+1]!=0){
+            parseAddFirst(CFG.productions[i][j+1], i, j+1, ind);
+        }else{
+            parseAddFollow(CFG.productions[i][j], i, j, ind);
+        }
+    }
+}
+
+void parseTable(){
+    for(int i=0;i<CFG.size;i++){
+        int ind = findInd(CFG.productions[i][0]);
+        parseAddFirst(CFG.productions[i][3], i, 3, ind);
+    }
+}
+
 
 
 int main(int argc, char **argv){
@@ -332,12 +444,15 @@ int main(int argc, char **argv){
     for(int i=0;i<LL.m;i++){
         visited[i] = 0;
     }
-    First();
-    Follow();
+    
 
     printf("********** Printing Productions ***********\n");
     for(int i=0;i<CFG.size;i++){
         printf("%s\n", CFG.productions[i]);
+    }
+    First();
+    for(int i=0;i<LL.m;i++){
+        visited[i] = 0;
     }
     printf("********** Printing First **********\n");
     for(int i=0;i<LL.m;i++){
@@ -351,6 +466,16 @@ int main(int argc, char **argv){
         printf("]\n");
         
     }
+    CFG.terminalLen = 0;
+    Follow();
+    
+    printf("*************Printing Terminals *************\n");
+    for(int i=0;i<CFG.terminalLen;i++){
+        printf("%c ", CFG.terminals[i]);
+    }
+    printf("\n");
+
+    
     printf("************** Printing Follow ***********\n");
     for(int i=0;i<LL.m;i++){
         printf("%c : [", LL.follow[i][0]);
@@ -362,7 +487,23 @@ int main(int argc, char **argv){
         }
         printf("]\n");
     }
-    
+    parseTable();
+    printf("*************Printing Table****************\n");
+    for(int i=0;i<LL.m;i++){
+        int ind = findInd(LL.first[i][0]);
+        for(int j=0;j<CFG.terminalLen;j++){
+            int ind1 = getInd(CFG.terminals[j]);
+            if( LL.tableLen[ind][ind1]>0){
+                printf("%c : %c- ", LL.first[i][0], CFG.terminals[j]);
+                for(int k=0;k<LL.tableLen[ind][ind1];k++){
+                    printf("%s, ", CFG.productions[LL.table[ind][ind1][k]]);
+                }
+                printf("\n");
+            }
+            
+        }
+        printf("\n");
+    }
 
     return 0;   
 }

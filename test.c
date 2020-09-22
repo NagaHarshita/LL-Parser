@@ -26,17 +26,18 @@ int main(int argc, char **argv)
 	int km = 0; 
 	int i, choice; 
 	char c, ch; 
-	count = 8; 
+	count = 4; 
 	
 	// The Input grammar 
-	strcpy(production[0], "E=TR"); 
-	strcpy(production[1], "R=+TR"); 
-	strcpy(production[2], "R=#"); 
-	strcpy(production[3], "T=FY"); 
-	strcpy(production[4], "Y=*FY"); 
-	strcpy(production[5], "Y=#"); 
-	strcpy(production[6], "F=(E)"); 
-	strcpy(production[7], "F=i"); 
+	strcpy(production[0], "E=AaAb"); 
+	strcpy(production[1], "E=BbBa"); 
+	strcpy(production[2], "A=#");
+	strcpy(production[3], "B=#");
+	// strcpy(production[3], "T=FY"); 
+	// strcpy(production[4], "Y=*FY"); 
+	// strcpy(production[5], "Y=#"); 
+	// strcpy(production[6], "F=(E)"); 
+	// strcpy(production[7], "F=i"); 
 	
 	int kay; 
 	char done[count]; 
